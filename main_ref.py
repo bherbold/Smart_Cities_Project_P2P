@@ -7,7 +7,7 @@ from random import randint
 import csv
 from datetime import datetime
 
-header = ['period', 'name', 'bill', 'energy_balance', 'ave_clearing_price', 'pv_supply', 'demand_load']
+header = ['period', 'name', 'bill', 'energy_balance', 'ave_clearing_price', 'pv_supply', 'demand_load', 'transactions', 'clearing est now', 'clearing price est before']
 # open the file in the write mode
 with open('example_clearing_ref.csv', 'w', encoding='UTF8', newline='') as f:
 
@@ -41,7 +41,7 @@ print("PV Prod loaded: ", pv_prod_HH)
 TODO: sorting of bidders
 """
 
-print(RLS.rls(2,0.5,1))
+print("PLS: ",RLS.rls(0.5,2,1))
 
 house1 = Household_APS.Household_APS("H1", 1, 5)
 house2 = Household_APS.Household_APS("H2", 4, 18)
@@ -77,8 +77,17 @@ def clearing (bidders_t_minus_1, households_t):
         if (isinstance(bidders_t_minus_1, float)):
             clearing_est_t = RLS.rls(house_bidder.learning_RLS, house_bidder.previous_p2p_bid_est,
                                      bidders_t_minus_1)
+            print("TEST: ", clearing_est_t)
+            print("Learning: ", house_bidder.learning_RLS)
+            print("house_bidder.previous_p2p_bid_est: ", house_bidder.previous_p2p_bid_est)
+            print("Bidder_t_minus_1: ", bidders_t_minus_1)
         else:
             clearing_est_t = RLS.rls(house_bidder.learning_RLS, find_previous_est (house, bidders_t_minus_1), find_old_clearing(house,bidders_t_minus_1))
+            """if clearing_est_t > house_bidder.clearing_price_grid_buy:
+                clearing_est_t = house_bidder.clearing_price_grid_buy
+            elif clearing_est_t < house_bidder.clearing_price_sell_grid:
+                clearing_est_t = house_bidder.clearing_price_sell_grid"""
+
         house_bidder.clearing_price_p2p_estimate_t = clearing_est_t
         print("preavius est. from " , house_bidder, ": ", house_bidder.previous_p2p_bid_est)
         print("est. clearing price from ", house_bidder, ": ", house_bidder.clearing_price_p2p_estimate_t)
@@ -356,7 +365,7 @@ def clearing_P2P (offers_allocation, bids_allocation):
     print("______________", return_list, "_____________")
     return return_list
 
-test_caculation = clearing(0.15,households_test)
+test_caculation = clearing(0.00015,households_test)
 for house in test_caculation:
     print("NAME: ", house.householdName)
     print("bill: ", house.bill)
@@ -367,7 +376,7 @@ hour = 0
 day = 1
 
 'multiple times'
-for i in range(1,672):
+for i in range(1,967):
     print("########## ITERATION ", datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0 ), "################  ")
     # all in Wh
     house1 = Household_APS.Household_APS("H1", int(load_HH[i+288]), 0)
@@ -396,7 +405,7 @@ for i in range(1,672):
             writer = csv.writer(f)
 
             # write a row to the csv file
-            writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0),house.householdName,house.bill, (house.supply_house_t - house.demand_house_t), house.ave_clearing_price, house.supply_house_t, house.demand_house_t])
+            writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0),house.householdName,house.bill, (house.supply_house_t - house.demand_house_t), house.ave_clearing_price, house.supply_house_t, house.demand_house_t, house.clearing_price_p2p, house.clearing_price_p2p_estimate_t, house.previous_p2p_bid_est])
         print(datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0))
     minute += 15
 
