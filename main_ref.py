@@ -21,34 +21,48 @@ with open('example_clearing_ref.csv', 'w', encoding='UTF8', newline='') as f:
 # close the file
 # f.close()
 
-pv_prod_HH = []
-load_HH = []
-with open('Hamburg_Juli_2021_pleasemultiplyby4.csv', newline='') as f:
+balance_HH1 = [] # Consumer 1
+balance_HH2 = [] # Consumer 2
+balance_HH3 = [] # Prosumer 1
+balance_HH4 = [] # Prosumer 2
+
+with open('Load_Prosumer1_Consumer1.csv', newline='') as f:
     reader = csv.reader(f)
     for row in reader:
-        if row[6] == "Solar Production":
+        if row[12] == "Consumer 1 (Everything)":
             continue
         else:
-            pv_prod_HH.append(float(row[6]))
+            balance_HH1.append(float(row[12]))
 
-        if row[6] == "Household Load":
+        if row[11] == "Prosumer 1 (Everything1-PV)":
             continue
         else:
-            load_HH.append(float(row[7]))
-        #print(row[6])
-print("PV Prod loaded: ", pv_prod_HH)
+            balance_HH3.append(float(row[11]))
+
+with open('Consumer2EV.csv', newline='') as f1:
+    reader = csv.reader(f1)
+    for row in reader:
+        balance_HH2.append(float(row[5]))
+
+with open('Prosumer2EV.csv', newline='') as f2:
+    reader = csv.reader(f2)
+    for row in reader:
+        balance_HH4.append(float(row[6]))
+
 """
 TODO: sorting of bidders
 """
 
 print(RLS.rls(2,0.5,1))
 
-house1 = Household_APS.Household_APS("H1", 1, 5)
-house2 = Household_APS.Household_APS("H2", 4, 18)
-house3 = Household_APS.Household_APS("H3", 3, 0)
-house4 = Household_APS.Household_APS("H4", 3, 0)
+house1 = Household_APS.Household_APS("H1", 1)
+house2 = Household_APS.Household_APS("H2", 4)
+house3 = Household_APS.Household_APS("H3", 3)
+house4 = Household_APS.Household_APS("H4", 3)
 house4.grid_selling_price = 0.00012
 households_test = [house1, house2, house3, house4]
+
+bills = [0, 0, 0, 0] # all user bills set to zero
 
 def clearing (bidders_t_minus_1, households_t):
     """
@@ -63,13 +77,9 @@ def clearing (bidders_t_minus_1, households_t):
     pv_surplus = 0;
     # Determine bids of household using RLS
     for house in households_t:
-        # print(type(house))
-        # house_bidder = Bidders.Bidders(house)
-        # find_old_clearing(house,bidders_t_minus_1)
+
         house_bidder = Bidders.Bidders(house.householdName,house.grid_buying_price,house.grid_selling_price)
-        house_bidder.energy_balance_t = round(house.supply_house_t - house.demand_house_t)
-        house_bidder.demand_house_t = house.demand_house_t
-        house_bidder.supply_house_t = house.supply_house_t
+        house_bidder.energy_balance_t = round(house.balance_house_t)
         grid_balance += house_bidder.energy_balance_t
         # house_bidder.clearing_price_grid_buy = house.grid_buying_price # price to buy power from grid for each household
         # house_bidder.clearing_price_sell_grid = house.grid_selling_price # price household gets to sell to grid
@@ -80,7 +90,7 @@ def clearing (bidders_t_minus_1, households_t):
         else:
             clearing_est_t = RLS.rls(house_bidder.learning_RLS, find_previous_est (house, bidders_t_minus_1), find_old_clearing(house,bidders_t_minus_1))
         house_bidder.clearing_price_p2p_estimate_t = clearing_est_t
-        print("preavius est. from " , house_bidder, ": ", house_bidder.previous_p2p_bid_est)
+        print("previous est. from " , house_bidder, ": ", house_bidder.previous_p2p_bid_est)
         print("est. clearing price from ", house_bidder, ": ", house_bidder.clearing_price_p2p_estimate_t)
         bidders.append(house_bidder)
         house_bidder.previous_p2p_bid_est = clearing_est_t
@@ -111,7 +121,7 @@ def clearing (bidders_t_minus_1, households_t):
                 #seller prizing
                 seller.bill = -(seller.clearing_price_p2p_estimate_t * max(0,seller.energy_balance_t))
                 print(seller, " PRICE of seller: ", seller.clearing_price_p2p_estimate_t)
-                print(seller, " bill of seller: ", seller.bill)
+                print(seller, " BILL of seller: ", seller.bill)
                 # grid_balance_allocation -= seller.energy_balance_t
 
                 #buyers pricing
@@ -303,6 +313,7 @@ def sort_buyers_P2P(buying_PV):
                 bids_allocation[i] = temp
 
     return bids_allocation
+
 def sort_seller_too_much_PV(seller_PV):
     offers_allocation = sorted(seller_PV, key=lambda x: x.clearing_price_p2p_estimate_t,
                              reverse=True)  # lowest load with lowest bid needs to pay the most
@@ -367,19 +378,19 @@ hour = 0
 day = 1
 
 'multiple times'
-for i in range(1,672):
+for i in range(672):
     print("########## ITERATION ", datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0 ), "################  ")
     # all in Wh
-    house1 = Household_APS.Household_APS("H1", int(load_HH[i+288]), 0)
-    house2 = Household_APS.Household_APS("H2", int(load_HH[i+384]), 0)
-    house3 = Household_APS.Household_APS("H3", int(load_HH[i+96]), int(round(pv_prod_HH[i]/4)))
-    house4 = Household_APS.Household_APS("H4", int(load_HH[i]), int(round(pv_prod_HH[i]/3)))
+    house1 = Household_APS.Household_APS("H1", int(balance_HH1[i]))
+    house2 = Household_APS.Household_APS("H2", int(balance_HH2[i]))
+    house3 = Household_APS.Household_APS("H3", int(balance_HH3[i]))
+    house4 = Household_APS.Household_APS("H4", int(balance_HH4[i]))
     house4.grid_selling_price = 0.00012
     print("Household inputs:")
-    print(house1.householdName , house1.demand_house_t, house1.supply_house_t)
-    print(house2.householdName, house2.demand_house_t, house2.supply_house_t)
-    print(house3.householdName, house3.demand_house_t, house3.supply_house_t)
-    print(house4.householdName, house4.demand_house_t, house4.supply_house_t)
+    print(house1.householdName , house1.balance_house_t)
+    print(house2.householdName, house2.balance_house_t)
+    print(house3.householdName, house3.balance_house_t)
+    print(house4.householdName, house4.balance_house_t)
     households_test_1 = [house1, house2, house3, house4]
     test_caculation = clearing(test_caculation, households_test_1)
     pv_prod = 0
@@ -396,7 +407,7 @@ for i in range(1,672):
             writer = csv.writer(f)
 
             # write a row to the csv file
-            writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0),house.householdName,house.bill, (house.supply_house_t - house.demand_house_t), house.ave_clearing_price, house.supply_house_t, house.demand_house_t])
+            writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0),house.householdName,house.bill, house.balance_house_t, house.ave_clearing_price, house.balance_house_t])
         print(datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0))
     minute += 15
 
@@ -406,3 +417,5 @@ for i in range(1,672):
     if hour == 24:
         hour = 0
         day += 1
+
+print(bills)

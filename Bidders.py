@@ -14,8 +14,7 @@ class Bidders (object):
     selling_PV = False
     bill = 0 # cost: if negative: more income than costs
     ave_clearing_price = None# average of all clearing prices (for calculation of RLS)
-    demand_house_t = None  # should be an array with 24h entries
-    supply_house_t = None  # should be an array with 24h entries
+    balance_house_t = None  # should be an array with 24h entries
 
     def __init__(self, name, clearing_price_grid_buy, clearing_price_sell_grid):
         self.householdName = name  # name of household
