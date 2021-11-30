@@ -29,15 +29,15 @@ balance_HH4 = [] # Prosumer 2
 with open('Load_Prosumer1_Consumer1.csv', newline='') as f:
     reader = csv.reader(f)
     for row in reader:
-        if row[12] == "Consumer 1 (Everything)":
+        if row[19] == "Consumer":
             continue
         else:
-            balance_HH1.append(float(row[12]))
+            balance_HH1.append(float(row[19]))
 
-        if row[11] == "Prosumer 1 (Everything1-PV)":
+        if row[18] == "Prosumer":
             continue
         else:
-            balance_HH3.append(float(row[11]))
+            balance_HH3.append(float(row[18]))
 
 with open('Consumer2EV.csv', newline='') as f1:
     reader = csv.reader(f1)
