@@ -5,8 +5,8 @@ class Household_APS(object):
 
     householdName = None # name of household
     balance_house_t = None # should be an array with 24h entries
-    grid_selling_price = 0.00008
-    grid_buying_price = 0.0003
+    grid_selling_price = 0.00008/4
+    grid_buying_price = 0.0003/4
     learning_RLS = 0.5 # default learning to RLS
 
     def __init__(self, name):

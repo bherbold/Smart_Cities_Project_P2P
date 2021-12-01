@@ -9,9 +9,9 @@ def rls(learning, c_n_g_t_est, c_n_g_t):
     :param c_n_g_t: actual clearing price from period 1 (before)
     :return: estimated clearing price from bidder
     """
-    print(learning)
-    print(c_n_g_t)
-    print(c_n_g_t_est)
+    #print(learning)
+    #print(c_n_g_t)
+    #print(c_n_g_t_est)
     c_n_g = c_n_g_t_est + learning * (c_n_g_t - c_n_g_t_est)
 
     return c_n_g
