@@ -150,10 +150,6 @@ def clearing (bidders_t_minus_1, households_t):
                 buyer.bill += -grid_balance * buyer.clearing_price_grid_buy
                 buyer.energy_balance_t += -grid_balance
                 
-                bought_energy_grid_Wh[buyer.householdName] = bought_energy_grid_Wh[buyer.householdName] - grid_balance
-                bought_energy_grid_euro[buyer.householdName] = bought_energy_grid_euro[buyer.householdName] - grid_balance * buyer.clearing_price_grid_buy
-                total_energy_balance[buyer.householdName] = total_energy_balance[buyer.householdName] - grid_balance
-                
                 grid_balance = 0
                 
                 break
@@ -176,17 +172,21 @@ def allocate_buyers (seller, buyers):
 
     for buyer in buyers:
         
-        if (pv_overprod >= -(buyer.energy_balance_t)):
+        if (pv_overprod >= -(buyer.energy_balance_t)) and (buyer.energy_balance_t < 0):
             
             transaction += -buyer.energy_balance_t
             allocation.append([buyer,-buyer.energy_balance_t, seller])
             pv_overprod += buyer.energy_balance_t
             seller.energy_balance_t = pv_overprod
+            buyer.energy_balance_t = 0
 
             #print("ALLOCATED", -buyer.energy_balance_t)
-        else:
-            transaction += pv_overprod
+        elif (pv_overprod < -(buyer.energy_balance_t)) and (buyer.energy_balance_t < 0):
+            
+            transaction = pv_overprod
+            buyer.energy_balance_t += pv_overprod
             pv_overprod = 0
+            seller.energy_balance_t = pv_overprod
             allocation.append([buyer, transaction, seller])
     
     #print(seller, " sells to: ", buyer)
@@ -279,21 +279,18 @@ def clearing_P2P (offers_allocation, bids_allocation):
     for seller in offers_allocation:
 
         allo_buyers = allocate_buyers(seller, bids_allocation)
-
-        if (seller.energy_balance_t >= 0):  # sells energy
+        
             # seller pricing
-            seller.bill = -(seller.clearing_price_p2p_estimate_t * max(0, seller.energy_balance_t))
-            #print(seller, " PRICE of seller in clearing_P2P: ", seller.clearing_price_p2p_estimate_t)
-            #print(seller, " bill of seller: ", seller.bill)
+        seller.bill = -(seller.clearing_price_p2p_estimate_t * max(0, seller.energy_balance_t))
+            
             # grid_balance_allocation -= bidder.energy_balance_t
-
             # buyers pricing
-            for buyer in allo_buyers:
-                #print("THIS BUYER:", buyer[1])
+        for buyer in allo_buyers:
+
                 buyer[0].clearing_price_p2p.append([seller.clearing_price_p2p_estimate_t, buyer[1], buyer[2]])
                 seller.clearing_price_p2p.append([seller.clearing_price_p2p_estimate_t, -buyer[1], buyer[0]])
-                #print("buying prices: ", buyer[0].clearing_price_p2p)
-                buyer[0].energy_balance_t -= buyer[1]
+                    
+                #buyer[0].energy_balance_t += buyer[1]
                 buyer[0].bill += (seller.clearing_price_p2p_estimate_t * buyer[1])
 
         priced_list.append(seller)
@@ -366,6 +363,11 @@ day = 1
 bills = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}    # total amount payed (grid and peers) for the trading period [€]
                                                 # all bills are set to 0 in the beginning of the trading period 
 
+bills_without_p2p = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}    # total amount payed (grid) for the trading period if the p2p was not implemented[€]
+                                                # all bills are set to 0 in the beginning of the trading period 
+bills_without_p2p______2 = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}    # total amount payed (grid) for the trading period if the p2p was not implemented[€]
+                                            # all bills are set to 0 in the beginning of the trading period 
+
 total_energy_balance = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}     # control variable [Wh]
                                                                 # all entries must correspond to the values in the input files
 
@@ -393,6 +395,13 @@ bought_energy_grid_Wh = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}    # total electric
 bought_energy_grid_euro = {'H1': 0, 'H2': 0, 'H3': 0, 'H4': 0}    # total electricity bought from the grid over one trading period [€]
                                                                 # = bought_energy_grid_euro * grid_buying_price                                       
 
+house1 = Household_APS.Household_APS("H1", int(balance_HH1[0]))
+house2 = Household_APS.Household_APS("H2", int(balance_HH2[0]))
+house3 = Household_APS.Household_APS("H3", int(balance_HH3[0]))
+house4 = Household_APS.Household_APS("H4", int(balance_HH4[0]))
+
+households_list = [house1, house2, house3, house4]
+bidders_list = clearing(0.00015, households_list)
 
 for i in range(672):
 
@@ -401,10 +410,30 @@ for i in range(672):
     house2 = Household_APS.Household_APS("H2", int(balance_HH2[i]))
     house3 = Household_APS.Household_APS("H3", int(balance_HH3[i]))
     house4 = Household_APS.Household_APS("H4", int(balance_HH4[i]))
-
     households_list = [house1, house2, house3, house4]
-    bidders_list = clearing(0.00015, households_list)
 
+    bills_without_p2p['H1'] = sum([bills_without_p2p['H1']], - house1.balance_house_t*house1.grid_buying_price)
+    total_energy_balance['H1'] = sum([total_energy_balance['H1']], - house1.balance_house_t)
+    bills_without_p2p['H2'] = sum([bills_without_p2p['H2']], - house2.balance_house_t*house2.grid_buying_price)
+    total_energy_balance['H2'] = sum([total_energy_balance['H2']], - house2.balance_house_t)
+
+    if house3.balance_house_t < 0:
+        bills_without_p2p['H3'] = sum([bills_without_p2p['H3']], - house3.balance_house_t*house3.grid_buying_price)
+        total_energy_balance['H3'] = sum([total_energy_balance['H3']], - house3.balance_house_t)
+    else:
+        bills_without_p2p['H3'] = sum([bills_without_p2p['H3']], -house3.balance_house_t*house3.grid_selling_price)
+        total_energy_balance['H3'] = sum([total_energy_balance['H3']], - house3.balance_house_t)
+
+    if house4.balance_house_t < 0:
+        bills_without_p2p['H4'] = sum([bills_without_p2p['H4']], -house4.balance_house_t*house4.grid_buying_price)
+        total_energy_balance['H4'] = sum([total_energy_balance['H4']], - house4.balance_house_t)
+    else:
+        bills_without_p2p['H4'] = sum([bills_without_p2p['H4']], -house4.balance_house_t*house4.grid_selling_price)
+        total_energy_balance['H4'] = sum([total_energy_balance['H4']], - house4.balance_house_t)
+
+
+    bidders_list = clearing(bidders_list, households_list)
+ 
     for house in bidders_list:
 
         # open the file in the write mode
@@ -412,7 +441,49 @@ for i in range(672):
 
             # create the csv writer
             writer = csv.writer(f)
+            
+            for transaction in house.clearing_price_p2p:
+                
+                if transaction[2] == None: # transactions involving grid
+                    if house.clearing_price_p2p[0][1] > 0:
+                        bought_energy_grid_Wh[house.householdName] = sum([bought_energy_grid_Wh[house.householdName]], abs(transaction[1]))
+                        bought_energy_grid_euro[house.householdName] = sum([bought_energy_grid_euro[house.householdName]], abs(transaction[1]*transaction[0]))
 
+                    elif house.clearing_price_p2p[0][1] < 0:
+                        sold_energy_grid_Wh[house.householdName] = sum([sold_energy_grid_Wh[house.householdName]], abs(transaction[1]))
+                        sold_energy_grid_euro[house.householdName] = sum([sold_energy_grid_euro[house.householdName]], abs(transaction[1]*transaction[0]))
+                
+                else: # transactions involving peers
+                    if transaction[1] < 0:
+                        if str(transaction[2]) == 'H1':                            
+                            sold_energy_peers_Wh[house.householdName] = sum([sold_energy_peers_Wh[house.householdName]], abs(transaction[1]))
+                            sold_energy_peers_euro[house.householdName] = sum([sold_energy_peers_euro[house.householdName]], abs(transaction[1]*transaction[0]))
+                            bought_energy_peers_Wh['H1'] = sum([bought_energy_peers_Wh['H1']], abs(transaction[1]))
+                            bought_energy_peers_euro['H1'] = sum([bought_energy_peers_euro['H1']], abs(transaction[1]*transaction[0]))
+                            #print("H1 buys ", abs(transaction[1]), "from", house.householdName, "at", transaction[0])
+                        elif str(transaction[2]) == 'H2':
+                            sold_energy_peers_Wh[house.householdName] = sum([sold_energy_peers_Wh[house.householdName]], abs(transaction[1]))
+                            sold_energy_peers_euro[house.householdName] = sum([sold_energy_peers_euro[house.householdName]], abs(transaction[1]*transaction[0]))
+                            bought_energy_peers_Wh['H2'] = sum([bought_energy_peers_Wh['H2']], abs(transaction[1]))
+                            bought_energy_peers_euro['H2'] = sum([bought_energy_peers_euro['H2']], abs(transaction[1]*transaction[0]))
+                            #print("H2 buys ", abs(transaction[1]), "from", house.householdName)
+                        elif str(transaction[2]) == 'H3':
+                            sold_energy_peers_Wh[house.householdName] = sum([sold_energy_peers_Wh[house.householdName]], abs(transaction[1]))
+                            sold_energy_peers_euro[house.householdName] = sum([sold_energy_peers_euro[house.householdName]], abs(transaction[1]*transaction[0]))
+                           
+                            bought_energy_peers_Wh['H3'] = sum([bought_energy_peers_Wh['H3']], abs(transaction[1]))
+                            bought_energy_peers_euro['H3'] = sum([bought_energy_peers_euro['H3']], abs(transaction[1]*transaction[0]))
+                            #print("H3 buys ", abs(transaction[1]), "from", house.householdName)
+                        elif str(transaction[2]) == 'H4':
+                            sold_energy_peers_Wh[house.householdName] = sum([sold_energy_peers_Wh[house.householdName]], abs(transaction[1]))
+                            sold_energy_peers_euro[house.householdName] = sum([sold_energy_peers_euro[house.householdName]], abs(transaction[1]*transaction[0]))
+                            
+                            bought_energy_peers_Wh['H4'] = sum([bought_energy_peers_Wh['H4']], abs(transaction[1]))
+                            bought_energy_peers_euro['H4'] = sum([bought_energy_peers_euro['H4']], abs(transaction[1]*transaction[0]))
+                    
+                    elif transaction[1] > 0:
+                        continue;
+                
             # write a row to the csv file
             writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0), house.householdName, house.bill, house.balance_house_t, house.ave_clearing_price, house.balance_house_t, house.clearing_price_p2p])
         
@@ -425,14 +496,56 @@ for i in range(672):
         hour = 0
         day += 1
 
-print(sold_energy_grid_Wh)
+print("sold_energy_grid_Wh: ", sold_energy_grid_Wh)
+print("sold_energy_grid_euro: ", sold_energy_grid_euro)
+print("bought_energy_grid_Wh: ", bought_energy_grid_Wh)
+print("bought_energy_grid_euro: ", bought_energy_grid_euro)
 
-print(bought_energy_grid_Wh)
+#print("-.-.-.-.-")
+#print(bought_energy_peers_Wh)
+#print(sold_energy_peers_Wh)
+#print("-.-.-.-.-")
+#print(bought_energy_peers_euro)
+#print(bought_energy_grid_euro)
 
-for house in bidders_list:
-    print(house.clearing_price_p2p)
+#print(sold_energy_peers_euro)
+#print("-.-.-.-.-")
+bills['H1'] = sum( [bills['H1']], -sold_energy_peers_euro['H1'])
+bills['H1'] = sum( [bills['H1']], -sold_energy_grid_euro['H1'])
+bills['H1'] = sum( [bills['H1']], bought_energy_grid_euro['H1'])
+bills['H1'] = sum( [bills['H1']], bought_energy_peers_euro['H1'])
+#print("bought_energy_peers_euro 4:", bought_energy_peers_euro['H1'])
+#print("4", bills['H1'])
+#print("1: p2p:", bills['H1'], "no p2p:", bills_without_p2p['H1'])
+#print("Demand 1 total: ",     total_energy_balance['H1'])
+
+bills['H2'] = sum( [bills['H2']], -sold_energy_peers_euro['H2'])
+bills['H2'] = sum( [bills['H2']], -sold_energy_grid_euro['H2'])
+bills['H2'] = sum( [bills['H2']], bought_energy_grid_euro['H2'])
+bills['H2'] = sum( [bills['H2']], bought_energy_peers_euro['H2'])
+#print(bought_energy_grid_euro['H2'])
+#print(bought_energy_peers_euro['H2'])
+#print("2: p2p:", bills['H2'], "no p2p:", bills_without_p2p['H2'])
+#rint("Demand 2 total: ",     total_energy_balance['H2'])
+
+bills['H3'] = sum( [bills['H3']], -sold_energy_peers_euro['H3'])
+bills['H3'] = sum( [bills['H3']], -sold_energy_grid_euro['H3'])
+bills['H3'] = sum( [bills['H3']], bought_energy_grid_euro['H3'])
+bills['H3'] = sum( [bills['H3']], bought_energy_peers_euro['H3'])
+#print("3: p2p:", bills['H3'], "no p2p:", bills_without_p2p['H3'])
+#print("Demand 3 total: ",     total_energy_balance['H3'])
+
+bills['H4'] = sum( [bills['H4']], -sold_energy_peers_euro['H4'])
+bills['H4'] = sum( [bills['H4']], -sold_energy_grid_euro['H4'])
+bills['H4'] = sum( [bills['H4']], bought_energy_grid_euro['H4'])
+bills['H4'] = sum( [bills['H4']], bought_energy_peers_euro['H4'])
+#print("4: p2p:", bills['H4'], "no p2p:", bills_without_p2p['H4'])
+#print("Demand 4 total: ",     total_energy_balance['H4'])
+print("bills_without_p2p: ", bills_without_p2p)
+print("bills: ", bills)
+#for house in bidders_list:
+    #print(house.clearing_price_p2p)
     #bills[house.householdName] = sold_energy_grid_euro[house.householdName] + sold_energy_peers_euro[house.householdName] - bought_energy_grid_euro[house.householdName] - bought_energy_peers_euro[house.householdName]
 
-#print(bills)
-for i in bidders_list:
-    print(i.bill*672)
+#for i in bidders_list:
+#    print(i.bill)
