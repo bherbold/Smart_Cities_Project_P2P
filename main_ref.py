@@ -332,7 +332,7 @@ with open('output_files/energy_flow.csv', 'w', encoding='UTF8', newline='') as f
 
 f_peers_energy.close()
 
-for load_profile_index in range (656):
+for load_profile_index in range (656): #should be 656
 
     #print(load_profile_index)
     output_filename = 'output_files/output' + str(load_profile_index) + '.csv'
@@ -433,10 +433,10 @@ for load_profile_index in range (656):
     for i in range(672):
 
         # all in Wh
-        house1 = Household_APS.Household_APS("H1", int(balance_HH1[i]))
-        house2 = Household_APS.Household_APS("H2", int(balance_HH2[i]))
-        house3 = Household_APS.Household_APS("H3", int(balance_HH3[i]))
-        house4 = Household_APS.Household_APS("H4", int(balance_HH4[i]))
+        house1 = Household_APS.Household_APS("H1", int(balance_HH1[i])/4)
+        house2 = Household_APS.Household_APS("H2", int(balance_HH2[i])/4)
+        house3 = Household_APS.Household_APS("H3", int(balance_HH3[i])/4)
+        house4 = Household_APS.Household_APS("H4", int(balance_HH4[i])/4)
         households_list = [house1, house2, house3, house4]
 
         bills_without_p2p['H1'] = sum([bills_without_p2p['H1']], - house1.balance_house_t*house1.grid_buying_price)
