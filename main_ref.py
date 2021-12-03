@@ -322,18 +322,18 @@ with open('output_files/bills_file.csv', 'w', encoding='UTF8', newline='') as f_
 
 f_bills.close()
 
-for load_profile_index in range (656):
+for load_profile_index in range (40,50):
 
     #print(load_profile_index)
     output_filename = 'output_files/output' + str(load_profile_index) + '.csv'
 
-    with open(output_filename, 'w', encoding='UTF8', newline='') as f:
+    #with open(output_filename, 'w', encoding='UTF8', newline='') as f:
 
         # create csv writer
-        writer = csv.writer(f)
+        #writer = csv.writer(f)
 
         # write header to the first row of the csv file
-        writer.writerow(header)
+        #writer.writerow(header)
 
     # Importing load profiles
 
@@ -454,10 +454,10 @@ for load_profile_index in range (656):
         for house in bidders_list:
 
             # open the file in the write mode
-            with open(output_filename, 'a', encoding='UTF8', newline='') as f:
+            #with open(output_filename, 'a', encoding='UTF8', newline='') as f:
 
                 # create the csv writer
-                writer = csv.writer(f)
+                #writer = csv.writer(f)
                 
                 for transaction in house.clearing_price_p2p:
                     
@@ -502,7 +502,7 @@ for load_profile_index in range (656):
                             continue;
                     
                 # write a row to the csv file
-                writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0), house.householdName, house.bill, house.balance_house_t, house.ave_clearing_price, house.balance_house_t, house.clearing_price_p2p])
+                #writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0), house.householdName, house.bill, house.balance_house_t, house.ave_clearing_price, house.balance_house_t, house.clearing_price_p2p])
          
         minute += 15
 
@@ -555,7 +555,7 @@ for load_profile_index in range (656):
     
     bills_list.append(bills)
     
-    f.close()
+    #f.close()
 
 f_bills.close()
 
