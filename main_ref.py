@@ -310,7 +310,19 @@ header = ['period', 'name', 'bill', 'energy_balance', 'ave_clearing_price', 'pv_
 
 bills_list = []
 
-for load_profile_index in range (655):
+# Creating an output file to store bills
+
+with open('output_files/bills_file.csv', 'w', encoding='UTF8', newline='') as f_bills:
+
+    # create csv writer
+    writer_f_bills = csv.writer(f_bills)
+
+    # write header to the first row of the csv file
+    writer_f_bills.writerow(['Iteration', 'H1 Weekly Bill [€]', 'H2 Weekly Bill [€]', 'H3 Weekly Bill [€]', 'H4 Weekly Bill [€]'])
+
+f_bills.close()
+
+for load_profile_index in range (656):
 
     #print(load_profile_index)
     output_filename = 'output_files/output' + str(load_profile_index) + '.csv'
@@ -535,9 +547,17 @@ for load_profile_index in range (655):
     bills['H4'] = sum( [bills['H4']], bought_energy_grid_euro['H4'])
     bills['H4'] = sum( [bills['H4']], bought_energy_peers_euro['H4'])
 
+    with open('output_files/bills_file.csv', 'a', encoding='UTF8', newline='') as f_bills:
+
+        writer_f_bills = csv.writer(f_bills)
+        
+        writer_f_bills.writerow([load_profile_index, bills['H1'], bills['H2'], bills['H3'], bills['H4']])
+    
     bills_list.append(bills)
     
     f.close()
+
+f_bills.close()
 
 index = 0;
 min_index = [0, 0, 0, 0];
