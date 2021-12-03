@@ -322,6 +322,16 @@ with open('output_files/bills_file.csv', 'w', encoding='UTF8', newline='') as f_
 
 f_bills.close()
 
+with open('output_files/energy_flow.csv', 'w', encoding='UTF8', newline='') as f_peers_energy:
+
+    # create csv writer
+    writer_f_peers_energy = csv.writer(f_peers_energy)
+
+    # write header to the first row of the csv file
+    writer_f_peers_energy.writerow(['Iteration', 'H1 Total Purchased Energy from Peers [Wh]', 'H2 Total Purchased Energy from Peers [Wh]', 'H3 Total Purchased Energy from Peers [Wh]', 'H4 Total Purchased Energy from Peers [Wh]', 'H3 Total Sold Energy from Peers [Wh]', 'H4 Total Sold Energy from Peers [Wh]'])
+
+f_peers_energy.close()
+
 for load_profile_index in range (40,50):
 
     #print(load_profile_index)
@@ -555,8 +565,19 @@ for load_profile_index in range (40,50):
     
     bills_list.append(bills)
     
+    with open('output_files/energy_flow.csv', 'a', encoding='UTF8', newline='') as f_peers_energy:
+
+        # create csv writer
+        writer_f_peers_energy = csv.writer(f_peers_energy)
+
+        # write header to the first row of the csv file
+        writer_f_peers_energy.writerow([load_profile_index, bought_energy_peers_Wh['H1'], bought_energy_peers_Wh['H2'], bought_energy_peers_Wh['H3'], bought_energy_peers_Wh['H4'], sold_energy_peers_Wh['H3'], sold_energy_peers_Wh['H4']])
+
+
+
     #f.close()
 
+f_peers_energy.close()
 f_bills.close()
 
 index = 0;
