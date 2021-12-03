@@ -332,7 +332,7 @@ with open('output_files/energy_flow.csv', 'w', encoding='UTF8', newline='') as f
 
 f_peers_energy.close()
 
-for load_profile_index in range (40,50): #should be 656
+for load_profile_index in range (656): #should be 656
 
     #print(load_profile_index)
     output_filename = 'output_files/output' + str(load_profile_index) + '.csv'
