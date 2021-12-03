@@ -332,7 +332,7 @@ with open('output_files/energy_flow.csv', 'w', encoding='UTF8', newline='') as f
 
 f_peers_energy.close()
 
-for load_profile_index in range (656): #should be 656
+for load_profile_index in range (40,50): #should be 656
 
     #print(load_profile_index)
     output_filename = 'output_files/output' + str(load_profile_index) + '.csv'
@@ -576,8 +576,17 @@ for load_profile_index in range (656): #should be 656
 
 
     #f.close()
+    bills_list.append(bills)
+
 
 f_peers_energy.close()
+
+with open('output_files/bills_file.csv', 'a', encoding='UTF8', newline='') as f_bills:
+
+        writer_f_bills = csv.writer(f_bills)
+        
+        writer_f_bills.writerow(['no p2p', bills_without_p2p['H1'], bills_without_p2p['H2'], bills_without_p2p['H3'], bills_without_p2p['H4']])
+
 f_bills.close()
 
 index = 0;
