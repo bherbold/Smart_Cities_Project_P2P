@@ -1,11 +1,8 @@
 import RLS
 import Household_APS
 import Bidders
-import Clearing_price
-import operator
-from random import randint
 import csv
-from datetime import datetime
+
 
 def clearing (bidders_t_minus_1, households_t):
     """
@@ -23,7 +20,7 @@ def clearing (bidders_t_minus_1, households_t):
     
     for house in households_t:
 
-        house_bidder = Bidders.Bidders(house.householdName,house.grid_buying_price,house.grid_selling_price)
+        house_bidder = Bidders.Bidders(house.householdName, house.grid_buying_price, house.grid_selling_price)
         house_bidder.energy_balance_t = round(house.balance_house_t)
         grid_balance += house_bidder.energy_balance_t
 
@@ -31,7 +28,7 @@ def clearing (bidders_t_minus_1, households_t):
             clearing_est_t = RLS.rls(house_bidder.learning_RLS, house_bidder.previous_p2p_bid_est,
                                      bidders_t_minus_1)
         else:
-            clearing_est_t = RLS.rls(house_bidder.learning_RLS, find_previous_est (house, bidders_t_minus_1), find_old_clearing(house,bidders_t_minus_1))
+            clearing_est_t = RLS.rls(house_bidder.learning_RLS, find_previous_est (house, bidders_t_minus_1), find_old_clearing(house, bidders_t_minus_1))
         house_bidder.clearing_price_p2p_estimate_t = clearing_est_t
 
         bidders.append(house_bidder)
@@ -433,10 +430,10 @@ for load_profile_index in range (656): #should be 656
     for i in range(672):
 
         # all in Wh
-        house1 = Household_APS.Household_APS("H1", int(balance_HH1[i])/4)
-        house2 = Household_APS.Household_APS("H2", int(balance_HH2[i])/4)
-        house3 = Household_APS.Household_APS("H3", int(balance_HH3[i])/4)
-        house4 = Household_APS.Household_APS("H4", int(balance_HH4[i])/4)
+        house1 = Household_APS.Household_APS("H1", int(balance_HH1[i]) / 4)
+        house2 = Household_APS.Household_APS("H2", int(balance_HH2[i]) / 4)
+        house3 = Household_APS.Household_APS("H3", int(balance_HH3[i]) / 4)
+        house4 = Household_APS.Household_APS("H4", int(balance_HH4[i]) / 4)
         households_list = [house1, house2, house3, house4]
 
         bills_without_p2p['H1'] = sum([bills_without_p2p['H1']], - house1.balance_house_t*house1.grid_buying_price)
