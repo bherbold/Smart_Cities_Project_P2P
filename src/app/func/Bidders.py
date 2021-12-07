@@ -1,5 +1,3 @@
-import Household_APS
-
 class Bidders (object):
     householdName = None  # name of household
     energy_balance_t = None  # if positive -> more power than needed

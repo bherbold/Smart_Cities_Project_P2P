@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a href="/people/load"><button>Load</button></a>
+{% for person in people %}
+    <h1>Hello {{ person.name }}!</h1>
+    {% if person.age >= 18 %}
+    <p>You are an adult.</p>
+    {% else %}
+    <p>You are a child.</p>
+    {% endif %}
+{% endfor %}
+<p>{{ data }}</p>
+</body>
+</html>
