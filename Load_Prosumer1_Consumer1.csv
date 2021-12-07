@@ -1,4 +1,4 @@
-﻿timestamp,Everything,No DishWasher,No WashingMach,Everything1,Everything2,No DishWasher1,No DishWasher2,No WashingMach1,No WashingMach2,Solar Production,Prosumer 1 (Everything1-PV),Consumer 1 (Everything),EV,Prosumer for EV (No DishWasher2-PV),,,,Prosumer,Consumer
+timestamp,Everything,No DishWasher,No WashingMach,Everything1,Everything2,No DishWasher1,No DishWasher2,No WashingMach1,No WashingMach2,Solar Production,Prosumer 1 (Everything1-PV),Consumer 1 (Everything),EV,Prosumer for EV (No DishWasher2-PV),,,,Prosumer,Consumer
 01/07/2021 00:00,257.1570757,40,207.6666667,232.0426064,223.2521974,284,265.9923273,509.7,42,0,232.0426064,257.1570757,7000,265.9923273,,,,-232.0426064,-257.1570757
 01/07/2021 00:15,273.4904091,40,144.3333333,335.620879,223.2521974,130.7333333,254.8237424,376.3666667,42,0,335.620879,273.4904091,7000,254.8237424,,,,-335.620879,-273.4904091
 01/07/2021 00:30,349.4904091,40,43,178.3333333,304.8840658,54.66666667,254.8237424,277.4333333,42,0,178.3333333,349.4904091,7000,254.8237424,,,,-178.3333333,-349.4904091
