@@ -381,11 +381,6 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
         with open('summer_prosumers_no_EV.csv', newline='') as f1: # files winter_prosumers_no_EV.csv or summer_prosumers_no_EV.csv - change next if's accordingly
             reader = csv.reader(f1)
             for row in reader:
-                if row[19] == "Consumer":
-                    continue
-                else:
-                    balance_HH1.append(float(row[19]))
-
                 if row[0] == "summer_pro1_no_EV":
                     continue
                 else:
@@ -404,13 +399,38 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
                 if row[3] == "summer_pro4_no_EV":
                     continue
                 else:
-                    balance_HH8.append(float(row[3]))
+                    balance_HH10.append(float(row[3]))
 
         f1.close()
 
+        with open('winter_summer_consumers_no_EV.csv', newline='') as f_: # file winter_summer_consumers_no_EV.csv
+            reader = csv.reader(f_)
+            for row in reader:
+                if row[10] == "Summer1Jul":
+                    continue
+                else:
+                    balance_HH1.append(float(row[10]))
+                
+                if row[11] == "Summer2Jul":
+                    continue
+                else:
+                    balance_HH5.append(float(row[11]))
+                
+                if row[12] == "Summer3Jul":
+                    continue
+                else:
+                    balance_HH7.append(float(row[12]))
+                
+                if row[13] == "Summer4Jul":
+                    continue
+                else:
+                    balance_HH9.append(float(row[13]))
+
+        f_.close()
+
         balance_HH2 = [] # Consumer 2 with EV
 
-        with open('Consumer2EV.csv', newline='') as f2:
+        with open('summer_con_EV.csv', newline='') as f2:
             reader = csv.reader(f2)
             for row in reader:
                 balance_HH2.append(float(row[load_profile_index2])) # should be load_profile_index1 if best_case_scenarios = [1]
@@ -419,7 +439,7 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
 
         balance_HH4 = [] # Prosumer 2 with EV
 
-        with open('Prosumer2EV.csv', newline='') as f3:
+        with open('summer_pro_EV.csv', newline='') as f3:
             reader = csv.reader(f3)
             for row in reader:
                 balance_HH4.append(float(row[load_profile_index1])) # should be load_profile_index2 if best_case_scenarios = [1]
