@@ -7,6 +7,22 @@ from random import randint
 import csv
 from datetime import datetime
 
+def gen_household(index): # adds new household to data dictionary
+   return {
+      "household_name": "H" + str(index+1),
+      "bill": 0,
+      "bill_without_p2p": 0,
+      "total_energy_balance": 0,
+      "sold_energy_peers_Wh": 0,
+      "sold_energy_peers_euro": 0,
+      "bought_energy_peers_Wh": 0,
+      "bought_energy_peers_euro": 0,
+      "sold_energy_grid_Wh": 0,
+      "sold_energy_grid_euro": 0,
+      "bought_energy_grid_Wh": 0,
+      "bought_energy_grid_euro": 0
+   }
+
 def clearing (bidders_t_minus_1, households_t):
     """
     real_clearing_price_t_minus_1 needs to be substituted with a list of the participants from before to calculate each
@@ -304,6 +320,16 @@ def clearing_P2P (offers_allocation, bids_allocation):
 ## - 2 prosumers (1 has EV, the other doesn't)
 ## - 2 consumers (1 has EV, the other doesn't)
 
+N = 4
+
+# initialize structure to store trading data
+
+data = {
+   "households": None
+}
+
+data["households"] = [gen_household(i) for i in range(N)]
+
 # Creation of the output file in write mode
  
 header = ['period', 'name', 'bill', 'energy_balance', 'ave_clearing_price', 'pv_supply', 'transactions']
@@ -442,7 +468,7 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
             house3 = Household_APS.Household_APS("H3", int(balance_HH3[i])/4)
             house4 = Household_APS.Household_APS("H4", int(balance_HH4[i])/4)
             households_list = [house1, house2, house3, house4]
-
+            
             bills_without_p2p['H1'] = sum([bills_without_p2p['H1']], - house1.balance_house_t*house1.grid_buying_price)
             total_energy_balance['H1'] = sum([total_energy_balance['H1']], - house1.balance_house_t)
             bills_without_p2p['H2'] = sum([bills_without_p2p['H2']], - house2.balance_house_t*house2.grid_buying_price)
