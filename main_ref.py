@@ -358,7 +358,17 @@ with open('output_files/energy_flow.csv', 'w', encoding='UTF8', newline='') as f
 
 f_peers_energy.close()
 
-best_case_scenarios = [439, 328, 320, 320, 324] # [1] (change also line 386) or [293, 245, 417, 124, 243] from previously ran simulations
+with open('output_files/price.csv', 'w', encoding='UTF8', newline='') as f_peers_price:
+
+    # create csv writer
+    writer_f_peers_price = csv.writer(f_peers_price)
+
+    # write header to the first row of the csv file
+    writer_f_peers_price.writerow(['Iteration 1', 'Iteration 2', 'Timestamp', 'Average Clearing Price H1', 'Average Clearing Price H2', 'Average Clearing Price H3', 'Average Clearing Price H4'])
+
+f_peers_price.close()
+
+best_case_scenarios = [1] # (change also line 386) or [293, 245, 417, 124, 243] from previously ran simulations
 
 for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_scenarios array
 
@@ -403,7 +413,7 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
         with open('winter_con_EV.csv', newline='') as f2:
             reader = csv.reader(f2)
             for row in reader:
-                balance_HH2.append(float(row[load_profile_index2])) # should be load_profile_index1 if best_case_scenarios = [1]
+                balance_HH2.append(float(row[load_profile_index1])) # should be load_profile_index1 if best_case_scenarios = [1]
 
         f2.close()
 
@@ -412,7 +422,7 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
         with open('winter_pro_EV.csv', newline='') as f3:
             reader = csv.reader(f3)
             for row in reader:
-                balance_HH4.append(float(row[load_profile_index1])) # should be load_profile_index2 if best_case_scenarios = [1]
+                balance_HH4.append(float(row[load_profile_index2])) # should be load_profile_index2 if best_case_scenarios = [1]
 
         f3.close()
 
@@ -498,7 +508,7 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
 
                 # open the file in the write mode
                 #with open(output_filename, 'a', encoding='UTF8', newline='') as f:
-
+                    
                     # create the csv writer
                     #writer = csv.writer(f)
                     
@@ -544,9 +554,14 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
                             elif transaction[1] > 0:
                                 continue;
                         
-                    # write a row to the csv file
-                    #writer.writerow([datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None,  fold=0), house.householdName, house.bill, house.balance_house_t, house.ave_clearing_price, house.balance_house_t, house.clearing_price_p2p])
-            
+            with open('output_files/price.csv', 'a', encoding='UTF8', newline='') as f_peers_price:
+
+                # create csv writer
+                writer_f_peers_price = csv.writer(f_peers_price)
+
+                # write average clearing price to the csv file
+                writer_f_peers_price.writerow([load_profile_index1, load_profile_index2, datetime(2021, 7, day, hour=hour, minute=minute, tzinfo=None, fold=0), bidders_list[0].ave_clearing_price, bidders_list[1].ave_clearing_price, bidders_list[2].ave_clearing_price, bidders_list[3].ave_clearing_price])
+
             minute += 15
 
             if minute == 60:
@@ -606,7 +621,6 @@ for load_profile_index2 in best_case_scenarios: # should be 656 or best_case_sce
 
             # write header to the first row of the csv file
             writer_f_peers_energy.writerow([load_profile_index1, load_profile_index2, bought_energy_peers_Wh['H1'], bought_energy_peers_Wh['H2'], bought_energy_peers_Wh['H3'], bought_energy_peers_Wh['H4'], sold_energy_peers_Wh['H3'], sold_energy_peers_Wh['H4']])
-
 
 
         #f.close()
